@@ -24,19 +24,8 @@ You'll need to do the following before starting:
 
 You can now proceed with the installation:
 
-  - Install `python-rtmbot` from GitHub:
-```
-git clone https://github.com/slackhq/python-rtmbot.git
-> Cloning into 'python-rtmbot'...
-> remote: Counting objects: 431, done.
-> remote: Total 431 (delta 0), reused 0 (delta 0), pack-reused 431
-> Receiving objects: 100% (431/431), 166.62 KiB | 90.00 KiB/s, done.
-> Resolving deltas: 100% (213/213), done.
-> Checking connectivity... done.
-```
-
-  - And the same again with `rtmbot-plugin-wallbot`:
-```
+  - Clone `rtmbot-plugin-wallbot` from GitHub:
+```shell
 git clone https://github.com/benfairless/rtmbot-plugin-wallbot.git
 > Cloning into 'rtmbot-plugin-wallbot'...
 > remote: Counting objects: 5, done.
@@ -46,47 +35,37 @@ git clone https://github.com/benfairless/rtmbot-plugin-wallbot.git
 > Checking connectivity... done.
 ```
 
-  - Copy the wallbot plugin into the rtmbot plugin directory:
-```
-cp rtmbot-plugin-wallbot/wallbot.py python-rtmbot/plugins/wallbot.py
-```
-
-  - Copy the example configuration file into the rtmbot directory:
-```
-cp rtmbot-plugin-wallbot/rtmbot.conf.example
+  - Create a Python virtualenv *optional*:
+```shell
+python3 -m venv ./.virtualenv && source ./.virtualenv/bin/activate
 ```
 
-  - Edit the configuration file found at `python-rtmbot/rtmbot.conf`:
+- Install dependencies:
+```shell
+pip install -r requirements.txt
+```
+
+  - Copy the example configuration file:
+```shell
+cp rtmbot.conf.example rtmbot.conf
+```
+
+  - Edit the configuration file found at `rtmbot.conf`:
 ```yaml
 DEBUG: False
-SLACK_TOKEN: "xoxb-11111111111-222222222222222222222222"
-WALLBOT:
-        INITIAL_USER:  your user_id
-        AUDIT_CHANNEL: audit channel_id
-        AUDIT_FILE: 'audit.log'
-        TRUST_FILE: 'trust.json'
-        POST_FILE: 'post.json'
-        IMGUR_ID: Imgur oAuth Token
-        IMGUR_SECRET: Imgur oAuth Secret Token
-```
+SLACK_TOKEN: "xoxb-XXXXXXXXXXX-XXXXXXXXXXXXXXXXXXXXXXXX"
+ACTIVE_PLUGINS:
+ - wallbot.plugin.Wallbot
 
-  - *Optional* Create Python virtualenv:
-```
-pyvenv ./virtualenv
-source ./virtualenv/bin/activate
-> (virtualenv) $
-```
-
-  - Install dependencies for both `python-rtmbot` and `rtmbot-plugin-wallbot`:
-```
-pip install -r python-rtmbot/requirements.txt
-> Successfully installed docutils-0.12 lockfile-0.12.2 python-daemon-2.1.1 pyyaml-3.12 requests-2.11.1 six-1.10.0 slackclient-1.0.1 websocket-client-0.37.0
-pip install -r rtmbot-plugin-wallbot/requirements.txt
-> Successfully installed imgurpython-1.1.7
+Wallbot:
+  ALLOW_UNTRUSTED: True # Disable once users are added to trust list
+  AUDIT_CHANNEL: 'GXXXXXXXX'
+  AUDIT_FILE: 'audit.log'
+  TRUST_FILE: 'trust.json'
+  POST_FILE: 'html/post.json'
 ```
 
   - Run `rtmbot`
 ```
-export WALLBOT_CONFIG='./python-rtmbot.conf'
-./python-rtmbot/rtmbot.py -c $WALLBOT_CONFIG
+rtmbot
 ```
