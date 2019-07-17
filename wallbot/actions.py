@@ -1,5 +1,5 @@
 from random import choice
-from wallbot.helpers import validate_users, lookup_user
+from wallbot.helpers import validate_users, lookup_user, save_post
 
 def list_commands(bot, slack):
     """ Help function which returns an (incomplete) list of commands available """
@@ -190,4 +190,35 @@ def remove_user(bot, slack):
 
     else:
         message = "I can't let you remove users because you are not a trusted user yourself. :confused:"
+    bot.send(message, slack['channel'])
+
+def post(bot, slack):
+    """ Posts a message to notification board """
+    message = []
+    max_length = 144
+    post_file = bot.config.get('POST_FILE', 'html/post.json')
+    if bot.trust.exists(slack['user']) or bot.config.get('ALLOW_UNTRUSTED', False):
+        if len(slack['text']) > max_length: # Message too large
+            message.extend((
+                "Wow! Your message is very long. Remember people will only see it for a couple of seconds.",
+                "Try shortening your message below %s characters and I'll post it for you." % max_length
+            ))
+        elif len(slack['text']) <= 0: # Empty message
+            message.extend((
+                "Hmm... You didn't actually give me a message to send to the notification board. :confused:",
+                "Try sending me a message along the lines of `@%s post Hello World`" % bot['user']
+            ))
+        else:
+            saved = save_post(post_file, bot.client, slack['text'], slack['user'])
+            message.extend((
+                "I have put the following message on the Seaton Court notification board:",
+                "%s - %s by %s" % (saved['message'], saved['timestamp'], saved['author'])
+            ))
+            bot.audit("*%s* was posted to the notification board on %s at the request of %s" % (saved['message'], saved['timestamp'], saved['author']))
+    else:
+        user = lookup_user(bot.client, slack['user'])
+        message.extend((
+            "I'm sorry. I'm not able to follow your instructions as you are not a trusted author.",
+            "If you would like to post messages you can ask an existing author to allow me to trust you."
+        ))
     bot.send(message, slack['channel'])
